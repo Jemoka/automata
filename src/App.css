@@ -8,11 +8,13 @@ html, body, .App {
 
 .container {
     display: grid;
+    border: 1px solid grey;
 }
 
 .cell {
     width: 8px;
     height: 8px;
-    margin: 1px;
+    margin: 0.25px;
+    cursor: pointer;
 }
 
