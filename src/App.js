@@ -1,68 +1,103 @@
 import "./App.css";
-import { useEffect, useState, useReducer } from "react";
+import { Component } from "react";
 
 const MAX_WIDTH=80 // NUM_COLS
 const MAX_HEIGHT=80 // NUM_ROWS
-const UPDATE_MS=5000 // NUM_ROWS
+const UPDATE_MS=2000// NUM_ROWS
+const RANDOM=true // random initalization
+const INIT_BIRTH_RATE=0.2 // fill initalization
 
 // The grid is
 // ROW-MAJOR (each index is [row][column])
 
-function App() {
-    let [grid, setGrid] = useState((new Array(MAX_HEIGHT)).fill());
-    let [ready, setReady] = useState(false);
-    let [running, setRunning] = useState(true);
-    const refreshReduce = useReducer(x => x + 1, 0);
+class App extends Component {
+    constructor(props) {
+        super(props);
 
-    useEffect(()=>{
-        // Assemble grid. A.k.a. "bad 2d array"
-        grid.forEach((_, i) => {
-            grid[i] = (new Array(MAX_WIDTH)).fill();
-        });
-        setReady(true);
-        setGrid(grid);
-    }, [])
-
-    setInterval(() => {
-        if (running && ready) {
-            grid.forEach((v, i) => {
-                v.forEach((u, j) => {
-                    let nei_count = grid[i+1] ? (grid[i+1][j] ? 1 : 0) : 0 +
-                                    grid[i][j+1] ? 1 : 0 +
-                                    grid[i+1] ? (grid[i+1][j+1] ? 1 : 0) : 0 +
-                                    grid[i-1] ? (grid[i-1][j] ? 1 : 0) : 0 +
-                                    grid[i][j-1] ? 1 : 0 +
-                                    grid[i-1] ? (grid[i-1][u-1] ? 1 : 0) : 0
-
-                    // TODO generalize
-                    if ((nei_count > 3 || nei_count < 2) && u) {
-                        grid[i][j] = false;
-                    } else if (nei_count === 3 && !u) {
-                        grid[i][j] = true;
-                    }
-                });
-            });
+        this.state = {
+            grid: (new Array(MAX_HEIGHT)).fill(),
+            ready: false,
+            running: true,
+            interval: null
         }
-    }, UPDATE_MS);
 
-    return (
+        this.update = this.update.bind(this);
+    }
+
+    update() {
+        if (!this.state.running)
+            return
+
+        let grid = this.state.grid;
+
+        grid.forEach((v, i) => {
+            v.forEach((u, j) => {
+                let nei_count = 0;
+                if (i < MAX_HEIGHT-1) {
+                    nei_count += grid[i+1][j] ? 1 : 0 +
+                                 grid[i+1][j+1] ? 1 : 0 +
+                                 grid[i+1][j-1] ? 1 : 0 
+                }
+
+                if (i > 0) {
+                    nei_count += grid[i-1][j] ? 1 : 0 +
+                                 grid[i-1][j+1] ? 1 : 0 +
+                                 grid[i-1][j-1] ? 1 : 0 
+                }
+
+                if (j < MAX_WIDTH-1)
+                    nei_count += grid[i][j+1] ? 1 : 0
+
+                if (j > 0)
+                    nei_count += grid[i][j-1] ? 1 : 0 
+
+
+                // TODO generalize
+                if ((nei_count > 3 || nei_count < 2) && u) 
+                    grid[i][j] = false;
+
+                if (nei_count === 3 && !u)
+                    grid[i][j] = true;
+            });
+        });
+        this.setState({grid});
+    }
+
+    componentDidMount() {
+        // Assemble grid. A.k.a. "bad 2d array"
+        this.state.grid.forEach((_, i) => {
+            this.state.grid[i] = (new Array(MAX_WIDTH).fill()).map(() => RANDOM ? Math.random() < INIT_BIRTH_RATE : undefined);
+        });
+        this.setState({
+            grid: this.state.grid, 
+            interval: setInterval(this.update, UPDATE_MS),
+            ready: true
+        });
+    }
+
+    componentWillMount() {
+        if (this.state.interval)
+            clearInterval(this.state.interval);
+    }
+
+    render() {
+        return (
         <div className="App">
-            {ready?
+            {this.state.ready?
             <div className="container" 
                 style={{
                     gridTemplateColumns: `repeat(${MAX_WIDTH}, auto)`,
                     gridTemplateRows: `repeat(${MAX_HEIGHT}, auto)`,
                 }}>
-                {grid.map((v, i) => {
+                {this.state.grid.map((v, i) => {
                     return (v.map((u, j) => {
                         return (
                             <div className="cell" key={`cell-${i}_${j}_${u?"f":"u"}`} id={`cell-${i}_${j}_${u?"f":"u"}`} style={{
                                     background: u ? "#434d5f" : "inherit"
                                 }}
                                 onClick={()=> {
-                                    grid[i][j]=!grid[i][j]
-                                    setGrid(grid);
-                                    refreshReduce[1]();
+                                    this.state.grid[i][j]=!this.state.grid[i][j]
+                                    this.setState({grid: this.state.grid});
                                     // https://stackoverflow.com/questions/46240647/react-how-to-force-a-function-component-to-render
                                 }}>
                                 &nbsp;
@@ -71,8 +106,10 @@ function App() {
                     }))
                 })}
             </div>:<div>Spinnin...</div>}
+            <div style={{paddingLeft: 5}} onClick={()=>this.setState({running: !this.state.running})}>{this.state.running?"Runnin":"Halttin"}</div>
         </div>
-    );
+        );
+    }
 }
 
 export default App;
