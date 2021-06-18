@@ -191,8 +191,8 @@ class App extends Component {
         <div className="App">
             <div>
                 <div style={{fontWeight: 700, marginBottom: 10, display: "inline-block"}}>Inheritance in Conway's Game of Life</div>
-                <div style={{float: "right", marginBottom: 10, display: "inline-block", cursor: "pointer", fontWeight: "300"}} onClick={()=>this.setState({running: !this.state.running})}>{this.state.running?"Pause":"Continue"}</div>
-                <div style={{float: "right", marginBottom: 10, paddingRight: 7, display: "inline-block", cursor: "pointer", fontWeight: "300"}} onClick={()=>this.clear()}>{"Clear"}</div>
+                <a style={{float: "right", marginBottom: 10, display: "inline-block", cursor: "pointer", fontWeight: "300"}} onClick={()=>this.setState({running: !this.state.running})}>{this.state.running?"Pause":"Continue"}</a>
+                <a style={{float: "right", marginBottom: 10, paddingRight: 7, display: "inline-block", cursor: "pointer", fontWeight: "300"}} onClick={()=>this.clear()}>{"Clear"}</a>
                 {this.state.ready?
                 <div className="container" 
                     style={{
@@ -216,6 +216,8 @@ class App extends Component {
                         }))
                     })}
                 </div>:<div>Spinnin...</div>}
+                <div style={{marginTop: 10, display: "inline-block", fontSize: 10, fontWeight: 600}}>A fun little side project by <a href="https://www.jemoka.com/">@jemoka</a></div>
+                <div style={{marginTop: 10, display: "inline-block", fontSize: 10, float: "right"}}>a nice little part of <a href="https://www.sanity.gq/">sanity</a>.</div>
             </div>
         </div>
         );
