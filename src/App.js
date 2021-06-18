@@ -3,9 +3,9 @@ import { Component } from "react";
 
 const MAX_WIDTH=80 // NUM_COLS
 const MAX_HEIGHT=80 // NUM_ROWS
-const UPDATE_MS=2000// NUM_ROWS
-const RANDOM=true // random initalization
-const INIT_BIRTH_RATE=0.2 // fill initalization
+const UPDATE_MS=500// NUM_ROWS
+const RANDOM=false // random initalization
+const INIT_BIRTH_RATE=0.3 // fill initalization
 
 // The grid is
 // ROW-MAJOR (each index is [row][column])
@@ -30,43 +30,47 @@ class App extends Component {
 
         let grid = this.state.grid;
 
+        let births = []
+        let deaths = []
+
         grid.forEach((v, i) => {
             v.forEach((u, j) => {
                 let nei_count = 0;
                 if (i < MAX_HEIGHT-1) {
-                    nei_count += grid[i+1][j] ? 1 : 0 +
-                                 grid[i+1][j+1] ? 1 : 0 +
-                                 grid[i+1][j-1] ? 1 : 0 
+                    nei_count += (grid[i+1][j] ? 1 : 0) +
+                                 (grid[i+1][j+1] ? 1 : 0) +
+                                 (grid[i+0][j-1] ? 1 : 0)
                 }
 
                 if (i > 0) {
-                    nei_count += grid[i-1][j] ? 1 : 0 +
-                                 grid[i-1][j+1] ? 1 : 0 +
-                                 grid[i-1][j-1] ? 1 : 0 
+                    nei_count += (grid[i-1][j] ? 1 : 0) +
+                                 (grid[i-1][j+1] ? 1 : 0) +
+                                 (grid[i-1][j-1] ? 1 : 0)
                 }
 
-                if (j < MAX_WIDTH-1)
-                    nei_count += grid[i][j+1] ? 1 : 0
-
-                if (j > 0)
-                    nei_count += grid[i][j-1] ? 1 : 0 
-
+                nei_count += (grid[i][j+1] ? 1 : 0)
+                nei_count += (grid[i][j-1] ? 1 : 0)
 
                 // TODO generalize
                 if ((nei_count > 3 || nei_count < 2) && u) 
-                    grid[i][j] = false;
+                    console.log("death!", i, j);
+                    deaths.push([i,j])
 
-                if (nei_count === 3 && !u)
-                    grid[i][j] = true;
+                if (nei_count === 3 && !u) {
+                    console.log("birth!", i, j);
+                    births.push([i,j])
+                }
             });
         });
+        deaths.forEach((v) => grid[v[0]][v[1]] = false);
+        births.forEach((v) => grid[v[0]][v[1]] = true);
         this.setState({grid});
     }
 
     componentDidMount() {
         // Assemble grid. A.k.a. "bad 2d array"
         this.state.grid.forEach((_, i) => {
-            this.state.grid[i] = (new Array(MAX_WIDTH).fill()).map(() => RANDOM ? Math.random() < INIT_BIRTH_RATE : undefined);
+            this.state.grid[i] = (new Array(MAX_WIDTH).fill()).map(() => RANDOM ? Math.random() < INIT_BIRTH_RATE : false);
         });
         this.setState({
             grid: this.state.grid, 
