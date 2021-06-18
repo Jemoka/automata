@@ -19,8 +19,8 @@ function blendColors(colorA, colorB, amount) {
     return '#' + r + g + b;
 }
 
-const MAX_WIDTH=80 // NUM_COLS
-const MAX_HEIGHT=80 // NUM_ROWS
+const MAX_WIDTH=70 // NUM_COLS
+const MAX_HEIGHT=70 // NUM_ROWS
 const UPDATE_MS=0// NUM_ROWS
 const RANDOM=true // random initalization
 const INIT_BIRTH_RATE=0.5 // fill initalization
@@ -41,6 +41,7 @@ class App extends Component {
         }
 
         this.update = this.update.bind(this);
+        this.clear = this.clear.bind(this);
     }
 
     update() {
@@ -143,6 +144,25 @@ class App extends Component {
         this.setState({grid, props});
     }
 
+    clear() {
+        if (this.state.interval)
+            clearInterval(this.state.interval);
+
+        this.state.grid.forEach((_, i) => {
+            this.state.grid[i] = (new Array(MAX_WIDTH).fill()).map(() => false);
+        });
+        this.state.props.forEach((_, i) => {
+            this.state.props[i] = (new Array(MAX_WIDTH).fill()).map(() => {
+                return {color: getRandomColor()}
+            });
+        });
+        this.setState({
+            grid: this.state.grid, 
+            props: this.state.props, 
+            interval: setInterval(this.update, UPDATE_MS),
+        });
+    }
+
     componentDidMount() {
         // Assemble grid. A.k.a. "bad 2d array"
         this.state.grid.forEach((_, i) => {
@@ -169,30 +189,34 @@ class App extends Component {
     render() {
         return (
         <div className="App">
-            {this.state.ready?
-            <div className="container" 
-                style={{
-                    gridTemplateColumns: `repeat(${MAX_WIDTH}, auto)`,
-                    gridTemplateRows: `repeat(${MAX_HEIGHT}, auto)`,
-                }}>
-                {this.state.grid.map((v, i) => {
-                    return (v.map((u, j) => {
-                        return (
-                            <div className="cell" key={`cell-${i}_${j}_${u?"f":"u"}`} id={`cell-${i}_${j}_${u?"f":"u"}`} style={{
-                                background: u ? this.state.props[i][j]["color"] : "inherit"
-                                }}
-                                onClick={()=> {
-                                    this.state.grid[i][j]=!this.state.grid[i][j]
-                                    this.setState({grid: this.state.grid});
-                                    // https://stackoverflow.com/questions/46240647/react-how-to-force-a-function-component-to-render
-                                }}>
-                                &nbsp;
-                            </div>
-                        )
-                    }))
-                })}
-            </div>:<div>Spinnin...</div>}
-            <div style={{paddingLeft: 5}} onClick={()=>this.setState({running: !this.state.running})}>{this.state.running?"Runnin":"Halttin"}</div>
+            <div>
+                <div style={{fontWeight: 700, marginBottom: 10, display: "inline-block"}}>Inheritance in Conway's Game of Life</div>
+                <div style={{float: "right", marginBottom: 10, display: "inline-block", cursor: "pointer", fontWeight: "300"}} onClick={()=>this.setState({running: !this.state.running})}>{this.state.running?"Pause":"Continue"}</div>
+                <div style={{float: "right", marginBottom: 10, paddingRight: 7, display: "inline-block", cursor: "pointer", fontWeight: "300"}} onClick={()=>this.clear()}>{"Clear"}</div>
+                {this.state.ready?
+                <div className="container" 
+                    style={{
+                        gridTemplateColumns: `repeat(${MAX_WIDTH}, auto)`,
+                        gridTemplateRows: `repeat(${MAX_HEIGHT}, auto)`,
+                    }}>
+                    {this.state.grid.map((v, i) => {
+                        return (v.map((u, j) => {
+                            return (
+                                <div className="cell" key={`cell-${i}_${j}_${u?"f":"u"}`} id={`cell-${i}_${j}_${u?"f":"u"}`} style={{
+                                    background: u ? this.state.props[i][j]["color"] : "inherit"
+                                    }}
+                                    onClick={()=> {
+                                        this.state.grid[i][j]=!this.state.grid[i][j]
+                                        this.setState({grid: this.state.grid});
+                                        // https://stackoverflow.com/questions/46240647/react-how-to-force-a-function-component-to-render
+                                    }}>
+                                    &nbsp;
+                                </div>
+                            )
+                        }))
+                    })}
+                </div>:<div>Spinnin...</div>}
+            </div>
         </div>
         );
     }
