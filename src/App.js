@@ -36,30 +36,31 @@ class App extends Component {
         grid.forEach((v, i) => {
             v.forEach((u, j) => {
                 let nei_count = 0;
+
+                // If the row number is smaller than max-height
                 if (i < MAX_HEIGHT-1) {
                     nei_count += (grid[i+1][j] ? 1 : 0) +
                                  (grid[i+1][j+1] ? 1 : 0) +
-                                 (grid[i+0][j-1] ? 1 : 0)
+                                 (grid[i+1][j-1] ? 1 : 0)
                 }
 
+                // If the row number is larger than 0
                 if (i > 0) {
                     nei_count += (grid[i-1][j] ? 1 : 0) +
                                  (grid[i-1][j+1] ? 1 : 0) +
                                  (grid[i-1][j-1] ? 1 : 0)
                 }
 
-                nei_count += (grid[i][j+1] ? 1 : 0)
-                nei_count += (grid[i][j-1] ? 1 : 0)
+                // Otherwise...
+                nei_count += (grid[i][j+1] ? 1 : 0) +
+                             (grid[i][j-1] ? 1 : 0)
 
                 // TODO generalize
                 if ((nei_count > 3 || nei_count < 2) && u) 
-                    console.log("death!", i, j);
                     deaths.push([i,j])
 
-                if (nei_count === 3 && !u) {
-                    console.log("birth!", i, j);
+                if (nei_count === 3 && !u)
                     births.push([i,j])
-                }
             });
         });
         deaths.forEach((v) => grid[v[0]][v[1]] = false);
