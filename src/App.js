@@ -21,7 +21,7 @@ function blendColors(colorA, colorB, amount) {
 
 const MAX_WIDTH=70 // NUM_COLS
 const MAX_HEIGHT=70 // NUM_ROWS
-const UPDATE_MS=0// NUM_ROWS
+const UPDATE_MS=500// NUM_ROWS
 const RANDOM=true // random initalization
 const INIT_BIRTH_RATE=0.5 // fill initalization
 
